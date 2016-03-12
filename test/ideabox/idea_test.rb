@@ -1,4 +1,5 @@
-require './config/environment'
+require './lib/ideabox/idea'
+require './test/test_helper'
 class CreateIdeas < ActiveRecord::Migration
   def change
     create_table :ideas do |t|
@@ -12,12 +13,14 @@ begin
 rescue
 end
 
-class Idea < ActiveRecord::Base
-end
-
-class IdeaTest < MiniTest::Unit::TestCase
+class IdeaTest < MiniTest::Test
+  include WithRollback
   def test_it_exists
-    idea = Idea.new(:description => 'A wonderful idea!')
-    assert_equal 'A wonderful idea!', idea.description
+    assert_equal 0, Idea.count
+    temporarily do
+      Idea.create(description: 'A wonderful idea!')
+      assert_equal 1, Idea.count
+    end
+    assert_equal 0, Idea.count
   end
 end
